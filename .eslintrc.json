@@ -1,0 +1,12 @@
+{
+  "extends": "airbnb-base",
+  "rules": {
+    "strict": "off",
+    "quotes": "off",
+    "func-names": "off",
+    "quote-props": "off",
+    "function-paren-newline": "off",
+    "comma-dangle": "off",
+    "no-use-before-define": "off"
+  }
+}
