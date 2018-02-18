@@ -1,7 +1,110 @@
 {
   "interactionModel":
-  {
+    {
     "languageModel": {
+      "types": [
+        {
+          "name": "AMAZON.AggregateRating",
+          "values": [
+            {
+              "id": null,
+              "name": {
+                "value": "10 out of 10",
+                "synonyms": []
+              }
+            },
+            {
+              "id": null,
+              "name": {
+                "value": "1 star",
+                "synonyms": []
+              }
+            },
+            {
+              "id": null,
+              "name": {
+                "value": "2 stars",
+                "synonyms": []
+              }
+            },
+            {
+              "id": null,
+              "name": {
+                "value": "3 stars",
+                "synonyms": []
+              }
+            },
+            {
+              "id": null,
+              "name": {
+                "value": "4 stars",
+                "synonyms": []
+              }
+            },
+            {
+              "id": null,
+              "name": {
+                "value": "5 stars",
+                "synonyms": []
+              }
+            },
+            {
+              "id": null,
+              "name": {
+                "value": "1 out of 5",
+                "synonyms": []
+              }
+            },
+            {
+              "id": null,
+              "name": {
+                "value": "2 out of 5",
+                "synonyms": []
+              }
+            },
+            {
+              "id": null,
+              "name": {
+                "value": "3 out of 5",
+                "synonyms": []
+              }
+            },
+            {
+              "id": null,
+              "name": {
+                "value": "4 out of 5",
+                "synonyms": []
+              }
+            },
+            {
+              "id": null,
+              "name": {
+                "value": "5 out of 5",
+                "synonyms": []
+              }
+            }
+          ]
+        },
+        {
+          "name": "AMAZON.EventType",
+          "values": [
+            {
+              "id": null,
+              "name": {
+                "value": "hackathon",
+                "synonyms": []
+              }
+            },
+            {
+              "id": null,
+              "name": {
+                "value": "beach",
+                "synonyms": []
+              }
+            }
+          ]
+        }
+      ],
       "intents": [
         {
           "name": "AMAZON.CancelIntent",
@@ -9,6 +112,12 @@
         },
         {
           "name": "AMAZON.HelpIntent",
+          "samples": [
+            "help me out"
+          ]
+        },
+        {
+          "name": "AMAZON.RepeatIntent",
           "samples": []
         },
         {
@@ -20,11 +129,9 @@
           "samples": [
             "give me a happy memory",
             "tell me a happy memory",
-            "i want a happy memory",
             "happy memory",
-            "happy",
             "make me happy",
-            "i need a pick me up"
+            "i need a pick-me-up"
           ],
           "slots": []
         },
@@ -34,7 +141,6 @@
             "give me a memory",
             "tell me a memory",
             "i want a memory",
-            "memory",
             "i'd like to listen",
             "listen"
           ],
@@ -45,9 +151,7 @@
           "samples": [
             "give me a sad memory",
             "tell me a sad memory",
-            "i want a sad memory",
             "sad memory",
-            "sad",
             "knock me down a peg",
             "make me sad"
           ],
@@ -56,15 +160,13 @@
         {
           "name": "QuestionFourIntent",
           "samples": [
-            "{city}",
+            "at {city}",
             "in {city}",
-            "{business}",
+            "at {business}",
             "in {business}",
             "in a {businesstype}",
             "at {landmark}",
             "in {country}",
-            "{country}",
-            "{civicstructure}",
             "at {civicstructure}"
           ],
           "slots": [
@@ -98,8 +200,8 @@
           "name": "QuestionOneIntent",
           "samples": [
             "{date}",
-            "it happened {date}",
-            "it was {date}"
+            "it happened on {date}",
+            "the date was {date}"
           ],
           "slots": [
             {
@@ -112,8 +214,8 @@
           "name": "QuestionSixIntent",
           "samples": [
             "{rating}",
-            "it was {rating}",
-            "i thought it was {rating}",
+            "i'd give it {rating}",
+            "i'd say it was {rating}",
             "in my opinion {rating}"
           ],
           "slots": [
@@ -154,16 +256,21 @@
         {
           "name": "StoreMemoryIntent",
           "samples": [
+            "share a memory",
+            "i'd like to share one",
+            "can i share one please",
+            "i want to share",
+            "i want to share a memory",
+            "to share a memory",
             "store a memory",
             "add a memory",
-            "i'd like to talk",
-            "talk",
+            "i'd like to share",
             "i wanna tell you about a memory"
           ],
           "slots": []
         }
       ],
-      "invocationName": "memoriam hack"
+      "invocationName": "memorium hack"
     }
   }
 }

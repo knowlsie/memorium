@@ -4,7 +4,7 @@ const Alexa = require(`alexa-sdk`);
 const request = require(`request-promise`);
 const AWS = require(`aws-sdk`);
 
-exports.handler = function(event, context) {
+exports.handler = function (event, context) {
   const alexa = Alexa.handler(event, context);
   alexa.registerHandlers(
     Handlers,
@@ -15,7 +15,8 @@ exports.handler = function(event, context) {
     QuestionFourHandlers,
     QuestionFiveHandlers,
     QuestionSixHandlers,
-    nonIntentHandlers);
+    NonIntentHandlers
+  );
   alexa.execute();
 };
 
@@ -32,21 +33,22 @@ const states = {
 const Handlers = {
   'LaunchRequest': function () {
     this.emit(':askHandler',
-      `Hi there. I'm memorium. Do you want to talk or listen.`,
-      `Feel free to ask for help if you need it.`
+      `Hi there. I am memorium. Do you want to share a memory, or listen to a memory.`,
+      `Sorry, it’s loud in here. Would you like to share a memory, or listen to a memory.`
     );
   },
   'StoreMemoryIntent': function () {
     this.handler.state = states.Q1MODE;
     this.emit(':askHandler',
-      `I'm going to ask you about a memory. First, when did the memory happen?`,
-      `When did the memory happen?`
+      `Tell me about it. When did it happen?`,
+      `Sorry, there is a lot of background noise. Can you tell me when the memory took place?`
     );
   },
   'GetPersonalMemoryIntent': function () {
     this.handler.state = states.MEMORYMODE;
     this.emit(':askHandler',
-      `Do you want a happy or sad memory?`
+      `Do you want to hear a happy memory, or a sad one?`,
+      `Sorry, there is a lot of background noise. Did you want a happy memory or a sad one?`
     );
   },
   'GetPersonalHappyMemoryIntent': function () {
@@ -67,8 +69,12 @@ const Handlers = {
   },
   'AMAZON.HelpIntent': function () {
     this.emit(':askHandler',
-      `HELP DIALOGUE HERE!`,
-      `REPEAT HELP DIALOGUE HERE!`
+      `Hi, I am Memorium. I hold your personal memories, and on days when you are feeling nostalgic,
+      I can tell you memories from the past.
+      For example, I can tell you a happy memory if you are feeling down.
+      You can add a memory, where I will ask you questions about your day,
+      or you can pull a happy or sad memory from the past. Now, please respond with either share, or listen. `,
+      `My bad. Could you repeat if you would like to share or listen to a memory?`
     );
   },
   'AMAZON.CancelIntent': function () {
@@ -76,7 +82,10 @@ const Handlers = {
     this.emit(':responseReady');
   },
   'Unhandled': function () {
-    this.emit(':askHandler', `Sorry, it's kinda loud in here. Did you want to talk or listen?`);
+    this.emit(':askHandler',
+      `Sorry, I didn’t catch that. Can you tell me if you want to share or listen?`,
+      `Sorry, I don’t understand. Would you like to share a memory or listen to a memory?`
+    );
   }
 };
 
@@ -96,8 +105,8 @@ const MemoryHandlers = Alexa.CreateStateHandler(states.MEMORYMODE, {
   },
   'AMAZON.HelpIntent': function () {
     this.emit(':askHandler',
-      `Hi, I'm roots. Do you want to talk or listen?`,
-      `Feel free to ask for help if you need it.`
+      `Want a happy memory or sad one?`,
+      `Sorry, I didn’t hear what you said because the room is pretty noisy right now. Was that happy or sad?`
     );
   },
   'AMAZON.CancelIntent': function () {
@@ -105,7 +114,10 @@ const MemoryHandlers = Alexa.CreateStateHandler(states.MEMORYMODE, {
     this.emit(':responseReady');
   },
   'Unhandled': function () {
-    this.emit(':askHandler', `Sorry, I didn't catch that. Do you want to try again?`);
+    this.emit(':askHandler',
+      `I’m sorry, I didn’t hear you. Could you repeat that?`,
+      `Sorry, your voice was muffled. Was that happy or sad?`
+    );
   }
 });
 
@@ -115,13 +127,11 @@ const QuestionOneHandlers = Alexa.CreateStateHandler(states.Q1MODE, {
     if (this.attributes.date) {
       this.handler.state = states.Q2MODE;
       this.emit(':askHandler',
-        `Great, so it happened on ${this.attributes.date}. Now who were you with?`,
-        `Who were you with when this happened?`
+        `Oh, so were you with anyone?`,
+        `I’m sorry, I didn’t hear you clearly. Who did you go with?`
       );
     } else {
-      this.emit(':askHandler',
-        `Sorry, I didn't catch that. When did it happen?`
-      );
+      this.emitWithState('Unhandled');
     }
   },
   'AMAZON.RepeatIntent': function () {
@@ -133,8 +143,8 @@ const QuestionOneHandlers = Alexa.CreateStateHandler(states.Q1MODE, {
   },
   'AMAZON.HelpIntent': function () {
     this.emit(':askHandler',
-      `Hi, I'm roots. Do you want to talk or listen?`,
-      `Feel free to ask for help if you need it.`
+      `Please respond with the date of the memory.`,
+      `Sorry, I didn’t hear what you said because the room is pretty noisy right now. What was the date again?`
     );
   },
   'AMAZON.CancelIntent': function () {
@@ -142,7 +152,10 @@ const QuestionOneHandlers = Alexa.CreateStateHandler(states.Q1MODE, {
     this.emit(':responseReady');
   },
   'Unhandled': function () {
-    this.emit(':askHandler', `Sorry, I didn't catch that. Do you want to try again?`);
+    this.emit(':askHandler',
+      `I’m sorry, I didn’t hear you. Could you repeat the date?`,
+      `Sorry, your voice was muffled. What was the date of the memory?`
+    );
   }
 });
 
@@ -152,12 +165,11 @@ const QuestionTwoHandlers = Alexa.CreateStateHandler(states.Q2MODE, {
     if (this.attributes.name) {
       this.handler.state = states.Q3MODE;
       this.emit(':askHandler',
-        `Cool, so ${this.attributes.name} was there. Now what were you doing?`
+        `What sort of thing did you go to?`,
+        `Sorry, I couldn’t make out what you said. What event did you go to?`
       );
     } else {
-      this.emit(':askHandler',
-        `Sorry, I didn't catch that. Who were you with?`
-      );
+      this.emitWithState('Unhandled');
     }
   },
   'AMAZON.RepeatIntent': function () {
@@ -169,8 +181,8 @@ const QuestionTwoHandlers = Alexa.CreateStateHandler(states.Q2MODE, {
   },
   'AMAZON.HelpIntent': function () {
     this.emit(':askHandler',
-      `Hi, I'm roots. Do you want to talk or listen?`,
-      `Feel free to ask for help if you need it.`
+      `Please let me know if you were alone or if you went with anyone.`,
+      `I’m sorry, your voice cut off in the middle. Did you go with anyone?`
     );
   },
   'AMAZON.CancelIntent': function () {
@@ -178,7 +190,10 @@ const QuestionTwoHandlers = Alexa.CreateStateHandler(states.Q2MODE, {
     this.emit(':responseReady');
   },
   'Unhandled': function () {
-    this.emit(':askHandler', `Sorry, I didn't catch that. Do you want to try again?`);
+    this.emit(':askHandler',
+      `Sorry, I didn’t catch that. Can you tell me if you went with anyone?`,
+      `Repeat that, please? Were you with anyone?`
+    );
   }
 });
 
@@ -188,12 +203,11 @@ const QuestionThreeHandlers = Alexa.CreateStateHandler(states.Q3MODE, {
     if (this.attributes.eventtype) {
       this.handler.state = states.Q4MODE;
       this.emit(':askHandler',
-        `So you were at a ${this.attributes.eventtype}. Now where did this happen?`
+        `Oh, so you were at a ${this.attributes.eventtype}! Where was it?`,
+        `It’s kind of loud in here. Where did you go?`
       );
     } else {
-      this.emit(':askHandler',
-        `Sorry, I didn't catch that. What did you do?`
-      );
+      this.emitWithState('Unhandled');
     }
   },
   'AMAZON.RepeatIntent': function () {
@@ -205,8 +219,8 @@ const QuestionThreeHandlers = Alexa.CreateStateHandler(states.Q3MODE, {
   },
   'AMAZON.HelpIntent': function () {
     this.emit(':askHandler',
-      `Hi, I'm roots. Do you want to talk or listen?`,
-      `Feel free to ask for help if you need it.`
+      `Please tell me the type of event you went to.`,
+      `Sorry, I didn’t quite hear what you said. What did you go to, again?`
     );
   },
   'AMAZON.CancelIntent': function () {
@@ -214,7 +228,10 @@ const QuestionThreeHandlers = Alexa.CreateStateHandler(states.Q3MODE, {
     this.emit(':responseReady');
   },
   'Unhandled': function () {
-    this.emit(':askHandler', `Sorry, I didn't catch that. Do you want to try again?`);
+    this.emit(':askHandler',
+      `I’m sorry, I didn’t catch that. Can you tell me what event you went to?`,
+      `My bad, please repeat that. What event were you at?`
+    );
   }
 });
 
@@ -237,12 +254,11 @@ const QuestionFourHandlers = Alexa.CreateStateHandler(states.Q4MODE, {
     if (this.attributes.place) {
       this.handler.state = states.Q5MODE;
       this.emit(':askHandler',
-        `Got it, the ${this.attributes.eventtype} happened in ${this.attributes.place}. Now just tell me about what happened. Feel free to say anything.`
+        `${this.attributes.place} is nice. How was it? What did you do?`,
+        `Sorry, I couldn’t hear you. Could you tell me how it was?`
       );
     } else {
-      this.emit(':askHandler',
-        `Sorry, I didn't catch that. Where did this happen?`
-      );
+      this.emitWithState('Unhandled');
     }
   },
   'AMAZON.RepeatIntent': function () {
@@ -254,8 +270,8 @@ const QuestionFourHandlers = Alexa.CreateStateHandler(states.Q4MODE, {
   },
   'AMAZON.HelpIntent': function () {
     this.emit(':askHandler',
-      `Hi, I'm roots. Do you want to talk or listen?`,
-      `Feel free to ask for help if you need it.`
+      `Please give me a location.`,
+      `There’s a lot of background noise right now. Could you tell me where it was?`
     );
   },
   'AMAZON.CancelIntent': function () {
@@ -263,7 +279,10 @@ const QuestionFourHandlers = Alexa.CreateStateHandler(states.Q4MODE, {
     this.emit(':responseReady');
   },
   'Unhandled': function () {
-    this.emit(':askHandler', `Sorry, I didn't catch that. Do you want to try again?`);
+    this.emit(':askHandler',
+      `Sorry, I don’t understand. Could you tell me the place again?`,
+      `Wait, could you remind me where you went?`
+    );
   }
 });
 
@@ -273,7 +292,7 @@ const QuestionFiveHandlers = Alexa.CreateStateHandler(states.Q5MODE, {
       method: 'POST',
       uri: 'https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment',
       headers: {
-        'Ocp-Apim-Subscription-Key': 'TOKEN'
+        'Ocp-Apim-Subscription-Key': '16871037656a414b9eb9a8a65945547b'
       },
       body: {
         documents: [
@@ -299,15 +318,15 @@ const QuestionFiveHandlers = Alexa.CreateStateHandler(states.Q5MODE, {
         const scoreReduce = (total, nextObject) => total + nextObject.score;
         this.attributes.average = response.documents.reduce(scoreReduce, 0) / response.documents.length;
         if (this.attributes.average > 0.5) {
-          responseText = `To me, that sounds like a good experience! How would you rate it?`;
-        } else if (this.attributes.average == 0.5) {
-          responseText = `To me, that sounds like it was ok. How would you rate it?`;
+          responseText = `To me, that sounds like a good experience! How would you rate it from one to five stars?`;
+        } else if (this.attributes.average === 0.5) {
+          responseText = `To me, that sounds just ok. How would you rate it from one to five stars?`;
         } else {
-          responseText = `To me, that sounds like a tough time. How would you rate it?`;
+          responseText = `To me, that sounds like a tough time. How would you rate it from one to five stars?`;
         }
         this.emit(':askHandler', responseText);
       }).catch(() => {
-        this.emit(':tell', `Classic tree hacks, something went wrong with our API... Let us try to fix it!`);
+        this.emit(':tell', `Classic tree hacks, something went wrong with an API call... Let us try to fix it!`);
       });
   },
   'AMAZON.RepeatIntent': function () {
@@ -319,8 +338,8 @@ const QuestionFiveHandlers = Alexa.CreateStateHandler(states.Q5MODE, {
   },
   'AMAZON.HelpIntent': function () {
     this.emit(':askHandler',
-      `Hi, I'm roots. Do you want to talk or listen?`,
-      `Feel free to ask for help if you need it.`
+      `Tell me anything you want.`,
+      `It’s noisy in here. Can you repeat what you did?`
     );
   },
   'AMAZON.CancelIntent': function () {
@@ -351,7 +370,7 @@ const QuestionSixHandlers = Alexa.CreateStateHandler(states.Q6MODE, {
         }
       };
 
-      const happy = (this.attributes.average >= 0.5);
+      const happy = (this.attributes.average > 0.5);
 
       const tableName = happy ? "Memoriam" : "MemoriamSad";
 
@@ -367,7 +386,7 @@ const QuestionSixHandlers = Alexa.CreateStateHandler(states.Q6MODE, {
       docClient.put(params, (err, returnData) => {
         if (err) {
           console.log(JSON.stringify(err, null, 2));
-          this.response.speak(`Some error occurred storing your memory. That's hackathons for you...`);
+          this.response.speak(`Some error occurred storing your memory. That's tree hacks for you... We're looking into it!`);
           this.emit(':responseReady');
         } else {
           console.log('Successful put.');
@@ -377,7 +396,8 @@ const QuestionSixHandlers = Alexa.CreateStateHandler(states.Q6MODE, {
       });
     } else {
       this.emit(':askHandler',
-        `Sorry, I didn't catch that. How would you rate it?`
+        `Sorry, I didn't catch that. How would you rate it?`,
+        `I’m sorry, your voice was muffled. What was the rating again?`
       );
     }
   },
@@ -390,8 +410,8 @@ const QuestionSixHandlers = Alexa.CreateStateHandler(states.Q6MODE, {
   },
   'AMAZON.HelpIntent': function () {
     this.emit(':askHandler',
-      `Hi, I'm roots. Do you want to talk or listen?`,
-      `Feel free to ask for help if you need it.`
+      `You can just give me a number from one to five.`,
+      `Oops, I missed that. Could you tell me what rating you said?`
     );
   },
   'AMAZON.CancelIntent': function () {
@@ -399,11 +419,14 @@ const QuestionSixHandlers = Alexa.CreateStateHandler(states.Q6MODE, {
     this.emit(':responseReady');
   },
   'Unhandled': function () {
-    this.emit(':askHandler', `Sorry, I didn't catch that. Do you want to try again?`);
+    this.emit(':askHandler',
+      `Sorry, I didn’t catch that. Could you remind me what was the rating?`,
+      `I’m sorry, your voice was muffled. What was the rating again?`
+    );
   }
 });
 
-const nonIntentHandlers = {
+const NonIntentHandlers = {
   ':askHandler': function askHandler(speechOutput, repromptSpeech) {
     if (speechOutput && repromptSpeech) {
       this.attributes.speechOutput = speechOutput;
@@ -440,15 +463,24 @@ const nonIntentHandlers = {
     docClient.query(params, (err, data) => {
       if (err) {
         console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
-        this.emit(':tell', `There was a problem retrieving your data. That's hackathons for you!`);
+        this.emit(':tell', `There was a problem retrieving your data. That's hackathons for you! We're working on it now.`);
       } else {
         console.log("Query succeeded.");
-        const randomMemory = data.Items[Math.floor(Math.random()*data.Items.length)].info;
-        this.emit(':tell',
-          `Remember how on ${randomMemory.date}, you and ${randomMemory.name} went to ${randomMemory.eventtype} in ${randomMemory.place}.
-          You gave the memory a rating of ${randomMemory.rating}.
-          We gave it a rating of ${Math.floor(randomMemory.sentiment * 100)} percent.`
-        );
+        if (data.Items.length === 0) {
+          this.emit(':askHandler',
+            `We don't have any memories stored for you yet; how about you tell me one?`,
+            `Would you like to store your first memory?`
+          );
+        } else {
+          const randomMemory = data.Items[Math.floor(Math.random()*data.Items.length)].info;
+          this.emit(':tellWithCard',
+            `Do you remember that time, on ${randomMemory.date} when you and ${randomMemory.name} went to ${randomMemory.place} for a ${randomMemory.eventtype}?
+            You gave the memory a rating of ${randomMemory.rating}.`,
+            `Your memory`,
+            `Do you remember that time, on ${randomMemory.date} when you and ${randomMemory.name} went to ${randomMemory.place} for a ${randomMemory.eventtype}?
+            You gave the memory a rating of ${randomMemory.rating}.`
+          );
+        }
       }
     });
   }
