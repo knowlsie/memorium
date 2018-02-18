@@ -7,7 +7,8 @@ const AWS = require(`aws-sdk`);
 exports.handler = function(event, context) {
   const alexa = Alexa.handler(event, context);
   alexa.registerHandlers(
-    handlers,
+    Handlers,
+    MemoryHandlers,
     QuestionOneHandlers,
     QuestionTwoHandlers,
     QuestionThreeHandlers,
@@ -28,7 +29,7 @@ const states = {
   Q6MODE: '_Q6MODE',
 };
 
-const handlers = {
+const Handlers = {
   'LaunchRequest': function () {
     this.emit(':askHandler',
       `Hi there. I'm memorium. Do you want to talk or listen.`,
@@ -49,14 +50,10 @@ const handlers = {
     );
   },
   'GetPersonalHappyMemoryIntent': function () {
-    this.emit(':tell',
-      `This is a happy memory.`
-    );
+    this.emit(':retrieveMemory', "Memoriam");
   },
   'GetPersonalSadMemoryIntent': function () {
-    this.emit(':tell',
-      `This is a sad memory.`
-    );
+    this.emit(':retrieveMemory', "MemoriamSad");
   },
   'SessionEndedRequest': function () {
     console.log('Session ended with reason: ' + this.event.request.reason);
@@ -84,19 +81,11 @@ const handlers = {
 };
 
 const MemoryHandlers = Alexa.CreateStateHandler(states.MEMORYMODE, {
-  'QuestionOneIntent': function () {
-    this.attributes.date = this.event.request.intent.slots.date.value;
-    if (this.attributes.date) {
-      this.handler.state = states.Q2MODE;
-      this.emit(':askHandler',
-        `Great, so it happened on ${this.attributes.date}. Now who were you with?`,
-        `Who were you with when this happened?`
-      );
-    } else {
-      this.emit(':askHandler',
-        `Sorry, I didn't catch that. When did it happen?`
-      );
-    }
+  'GetPersonalHappyMemoryIntent': function () {
+    this.emit(':retrieveMemory', "Memoriam");
+  },
+  'GetPersonalSadMemoryIntent': function () {
+    this.emit(':retrieveMemory', "MemoriamSad");
   },
   'AMAZON.RepeatIntent': function () {
     this.emit(':repeatHandler');
@@ -118,7 +107,7 @@ const MemoryHandlers = Alexa.CreateStateHandler(states.MEMORYMODE, {
   'Unhandled': function () {
     this.emit(':askHandler', `Sorry, I didn't catch that. Do you want to try again?`);
   }
-})
+});
 
 const QuestionOneHandlers = Alexa.CreateStateHandler(states.Q1MODE, {
   'QuestionOneIntent': function () {
@@ -362,8 +351,12 @@ const QuestionSixHandlers = Alexa.CreateStateHandler(states.Q6MODE, {
         }
       };
 
+      const happy = (this.attributes.average >= 0.5);
+
+      const tableName = happy ? "Memoriam" : "MemoriamSad";
+
       const params = {
-        TableName: "Memoriam",
+        TableName: tableName,
         Item: {
           "user-id": data.userId,
           "session-id": data.sessionId,
@@ -374,11 +367,11 @@ const QuestionSixHandlers = Alexa.CreateStateHandler(states.Q6MODE, {
       docClient.put(params, (err, returnData) => {
         if (err) {
           console.log(JSON.stringify(err, null, 2));
-          this.response.speak(`Some error occurred storing your data. That's hackathons for you...`);
+          this.response.speak(`Some error occurred storing your memory. That's hackathons for you...`);
           this.emit(':responseReady');
         } else {
           console.log('Successful put.');
-          this.response.speak(`Thanks for chatting. I've remembered your memory, and you might hear it later if you ask for a memory...`);
+          this.response.speak(`Thanks for chatting. I've stored your memory, and you might hear it if you come back at some later date...`);
           this.emit(':responseReady');
         }
       });
@@ -430,4 +423,33 @@ const nonIntentHandlers = {
       this.emitWithState('Unhandled');
     }
   },
+  ':retrieveMemory': function retrieveMemory(tableName) {
+    var docClient = new AWS.DynamoDB.DocumentClient();
+
+    const params = {
+      TableName : tableName,
+      KeyConditionExpression: "#ui = :thing",
+      ExpressionAttributeNames: {
+        "#ui": "user-id"
+      },
+      ExpressionAttributeValues: {
+        ":thing": this.event.context.System.user.userId
+      }
+    };
+
+    docClient.query(params, (err, data) => {
+      if (err) {
+        console.log("Unable to query. Error:", JSON.stringify(err, null, 2));
+        this.emit(':tell', `There was a problem retrieving your data. That's hackathons for you!`);
+      } else {
+        console.log("Query succeeded.");
+        const randomMemory = data.Items[Math.floor(Math.random()*data.Items.length)].info;
+        this.emit(':tell',
+          `Remember how on ${randomMemory.date}, you and ${randomMemory.name} went to ${randomMemory.eventtype} in ${randomMemory.place}.
+          You gave the memory a rating of ${randomMemory.rating}.
+          We gave it a rating of ${Math.floor(randomMemory.sentiment * 100)} percent.`
+        );
+      }
+    });
+  }
 };

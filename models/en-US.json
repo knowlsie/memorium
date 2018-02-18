@@ -21,7 +21,10 @@
             "give me a happy memory",
             "tell me a happy memory",
             "i want a happy memory",
-            "happy memory"
+            "happy memory",
+            "happy",
+            "make me happy",
+            "i need a pick me up"
           ],
           "slots": []
         },
@@ -31,6 +34,7 @@
             "give me a memory",
             "tell me a memory",
             "i want a memory",
+            "memory",
             "i'd like to listen",
             "listen"
           ],
@@ -42,7 +46,10 @@
             "give me a sad memory",
             "tell me a sad memory",
             "i want a sad memory",
-            "sad memory"
+            "sad memory",
+            "sad",
+            "knock me down a peg",
+            "make me sad"
           ],
           "slots": []
         },
