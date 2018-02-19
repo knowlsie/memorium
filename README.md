@@ -2,6 +2,8 @@
 
 ## Winner of ‘Best Voice Experience for Amazon Alexa’ at Treehacks 2018
 
+Team: Tatiana Wu, Tassica Lim, Luis Ulloa, Tom Knowles.
+
 ## Inspiration
 - When it comes to mental health, being honest is the first step towards personal growth, and that honesty has to first start with yourself. Memorium is built around that belief. Candid thoughts for the sake of self-reflection and personal growth—this is the platform that Memorium endeavors to create for its users.
 
